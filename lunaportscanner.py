@@ -10,7 +10,7 @@ from colorama import Fore, Style, init
 # Initialize colorama (works on Windows terminals)
 init(autoreset=True)
 
-__version__ = "2.0"
+__version__ = "2.1"
 
 # Defaults
 DEFAULT_TIMEOUT = 1.0
@@ -210,7 +210,8 @@ async def run_noninteractive(target: str, ports: List[int], protocols: List[str]
 def main():
     parser = argparse.ArgumentParser(description="Luna Port Scanner 2.0")
     parser.add_argument('-t', '--target', help='Target host (domain or IP)')
-    parser.add_argument('-p', '--ports', default='80', help='Ports: single, range (20-25) or comma list (80,443)')
+    # Make --ports optional so we can prompt for it when target is provided
+    parser.add_argument('-p', '--ports', default=None, help='Ports: single, range (20-25) or comma list (80,443)')
     parser.add_argument('--protocol', default='TCP', help='Protocol: TCP, UDP or BOTH')
     parser.add_argument('--timeout', type=float, default=DEFAULT_TIMEOUT, help='Connection timeout in seconds')
     parser.add_argument('--concurrency', type=int, default=DEFAULT_CONCURRENCY, help='Max concurrent connections')
@@ -226,7 +227,21 @@ def main():
     concurrency = max(1, args.concurrency)
 
     if args.target:
-        ports = parse_ports(args.ports)
+        # If ports weren't supplied on the command line, prompt the user (so ranges like 20-25 won't be parsed as flags)
+        ports_str = args.ports
+        if ports_str is None:
+            try:
+                # Prompt for ports (this will accept ranges like 20-25 safely)
+                ports_str = input("Enter port (single), range (20-25) or comma list (80,443): ").strip()
+            except KeyboardInterrupt:
+                print("\nExiting...")
+                return
+
+        if not ports_str:
+            print(Fore.RED + "[!] No ports provided.")
+            return
+
+        ports = parse_ports(ports_str)
         protocols = protocols_from_str(args.protocol)
         if not ports:
             print(Fore.RED + "[!] No valid ports specified.")
