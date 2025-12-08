@@ -1,17 +1,16 @@
-# Luna Port Listener
+# Luna Port Scanner
 
-**Version:** v3.0 (Go Rewrite)  
 **License:** Unlicensed
 
-Luna Port Listener is a lightweight and fast Windows tool for scanning TCP and UDP ports.  
+Luna Port scanner is a lightweight and fast Windows tool for scanning TCP and UDP ports.  
 It supports both interactive mode and non-interactive silent mode, making it useful for quick checks or automated tasks.
 
 ## Executables
 
 | Architecture | Filename |
 |-------------|----------|
-| 64-bit      | `lunaportlistener.exe` |
-| 32-bit      | `lunaportlistener-x86.exe` |
+| 64-bit      | `lunaportscanner.exe` |
+| 32-bit      | `lunaportscanner-x86.exe` |
 
 ## Features
 
@@ -30,7 +29,7 @@ It supports both interactive mode and non-interactive silent mode, making it use
 Run:
 
 ```
-lunaportlistener.exe
+lunaportscanner.exe
 ```
 
 You will be prompted for:
@@ -50,7 +49,7 @@ After each scan, you can choose to continue.
 Writes results to a log file:
 
 ```
-lunaportlistener.exe -t example.com -p 80,443 -protocol BOTH
+lunaportscanner.exe -t example.com -p 80,443 -protocol BOTH
 ```
 
 Output file example:
@@ -63,24 +62,24 @@ scan-example.com.log
 
 | Flag | Description |
 |------|-------------|
-| `-t` | Target host (required) |
-| `-p` | Ports, e.g. `22`, `80,443`, `20-25` |
-| `-protocol` | `TCP` \| `UDP` \| `BOTH` (default: TCP) |
-| `-timeout` | Timeout in seconds (default: `1.0`) |
-| `-concurrency` | Scan threads (default: `200`) |
+| `--target` | Target host (required) |
+| `--port` | Ports, e.g. `22`, `80,443`, `20-25` |
+| `--protocol` | `TCP` \| `UDP` \| `BOTH` (default: TCP) |
+| `--timeout` | Timeout in seconds (default: `1.0`) |
+| `--concurrency` | Scan threads (default: `200`) |
 | `--version` | Show version and exit |
 
 Example:
 
 ```
-lunaportlistener.exe -t 192.168.1.10 -p 1-1024 -protocol TCP
+lunaportscanner.exe --target 192.168.1.10 --port 1-1024 --protocol TCP
 ```
 
-Silent mode produces **no console output**.
+Silent mode is the default and produces **no console output**, use `--show` to produce console output instead.
 
 ## System Requirements
 
-- Windows 8.1 or later  
+- Windows 8.1 (32bit/64bit) or later  
 - No installation required  
 - No administrator privileges needed  
 
