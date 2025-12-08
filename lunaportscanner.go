@@ -12,7 +12,7 @@ import (
     "time"
 )
 
-const Version = "v3.0 (Go Rewrite)"
+const Version = "v4.0 (Go Rewrite)"
 
 // ------------------------------------------------------------
 // Port Parsing
@@ -251,41 +251,84 @@ func runInteractive(timeout time.Duration, concurrency int) {
 // Non-Interactive Mode (silent, logs only)
 // ------------------------------------------------------------
 
-func runNonInteractive(target string, ports []int, protocols []string, timeout time.Duration, concurrency int) {
-    ips := resolveTarget(target)
-    logFile := fmt.Sprintf("scan-%s.log", target)
+func runNonInteractive(target string, ports []int, protocols []string, timeout time.Duration, concurrency int, show bool) {
 
-    f, err := os.Create(logFile)
-    if err != nil {
-        return
+    ips := resolveTarget(target)
+
+    var f *os.File
+    var err error
+
+    // If not show, create log file
+    if !show {
+        logFile := fmt.Sprintf("scan-%s.log", target)
+        f, err = os.Create(logFile)
+        if err != nil {
+            return
+        }
+        defer f.Close()
     }
-    defer f.Close()
 
     for _, ip := range ips {
-        fmt.Fprintf(f, "\n--- Scanning %s ---\n", ip)
+        header := fmt.Sprintf("\n--- Scanning %s ---\n", ip)
+
+        if show {
+            fmt.Print(header)
+        } else {
+            fmt.Fprint(f, header)
+        }
+
         results := scanTarget(ip, ports, protocols, timeout, concurrency)
 
         if len(results) == 0 {
-            fmt.Fprintf(f, "   No open ports found\n")
+            if show {
+                fmt.Println("   No open ports found")
+            } else {
+                fmt.Fprintln(f, "   No open ports found")
+            }
         } else {
             for _, r := range results {
-                fmt.Fprintf(f, "   %s\n", r)
+                if show {
+                    fmt.Println("   " + r)
+                } else {
+                    fmt.Fprintln(f, "   "+r)
+                }
             }
         }
     }
 }
+
+
 
 // ------------------------------------------------------------
 // Main
 // ------------------------------------------------------------
 
 func main() {
-    target := flag.String("t", "", "Target host")
-    portStr := flag.String("p", "", "Ports: 80,443 or 20-25")
-    protocol := flag.String("protocol", "TCP", "TCP | UDP | BOTH")
-    timeout := flag.Float64("timeout", 1.0, "Timeout seconds")
-    concurrency := flag.Int("concurrency", 200, "Concurrency level")
-    version := flag.Bool("version", false, "Show version")
+	target := flag.String("target", "", "Target host")
+	portStr := flag.String("port", "", "Ports: 80,443 or 20-25")
+	protocol := flag.String("protocol", "TCP", "TCP | UDP | BOTH")
+	timeout := flag.Float64("timeout", 1.0, "Timeout seconds")
+	concurrency := flag.Int("concurrency", 200, "Concurrency level")
+	version := flag.Bool("version", false, "Show version")
+	show := flag.Bool("show", false, "Show results on screen instead of saving to a log file")
+
+
+    flag.Usage = func() {
+    fmt.Fprintf(os.Stderr, "Luna Port Scanner %s\n\n", Version)
+    fmt.Fprintf(os.Stderr, "Usage:\n")
+    fmt.Fprintf(os.Stderr, "  lunaportscanner [options]\n\n")
+    fmt.Fprintf(os.Stderr, "Options:\n")
+    fmt.Fprintf(os.Stderr, "  --target string\n        Target host\n")
+    fmt.Fprintf(os.Stderr, "  --port string\n        Ports: 80,443 or 20-25\n")
+    fmt.Fprintf(os.Stderr, "  --protocol string\n        TCP | UDP | BOTH (default \"TCP\")\n")
+    fmt.Fprintf(os.Stderr, "  --timeout float\n        Timeout seconds (default 1)\n")
+    fmt.Fprintf(os.Stderr, "  --concurrency int\n        Concurrency level (default 200)\n")
+    fmt.Fprintf(os.Stderr, "  --version\n        Show version\n")
+    fmt.Fprintf(os.Stderr, "  --show\n        Show results on screen instead of saving to a log file\n")
+    fmt.Fprintf(os.Stderr, "  --help\n        Show this help\n\n")
+}
+
+    
     flag.Parse()
 
     if *version {
@@ -310,10 +353,12 @@ func main() {
             return
         }
 
-        runNonInteractive(*target, ports, protocols, tout, *concurrency)
+        runNonInteractive(*target, ports, protocols, tout, *concurrency, *show)
+
         return
     }
 
     runInteractive(tout, *concurrency)
 }
+
 
