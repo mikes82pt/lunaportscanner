@@ -49,7 +49,7 @@ After each scan, you can choose to continue.
 Writes results to a log file:
 
 ```
-lunaportscanner.exe -t example.com -p 80,443 -protocol BOTH
+lunaportscanner.exe --target example.com --port 80,443 -protocol BOTH
 ```
 
 Output file example:
@@ -66,20 +66,21 @@ scan-example.com.log
 | `--port` | Ports, e.g. `22`, `80,443`, `20-25` |
 | `--protocol` | `TCP` \| `UDP` \| `BOTH` (default: TCP) |
 | `--timeout` | Timeout in seconds (default: `1.0`) |
-| `--concurrency` | Scan threads (default: `200`) |
+| `--concurrency` | Scan threads (default: `50`) Above 100 is not recommended |
 | `--version` | Show version and exit |
 
 Example:
 
 ```
-lunaportscanner.exe --target 192.168.1.10 --port 1-1024 --protocol TCP
+lunaportscanner.exe --target 192.168.1.10 --port 1-1024 --protocol TCP --show
 ```
 
 Silent mode is the default and produces **no console output**, use `--show` to produce console output instead.
 
 ## System Requirements
 
-- Windows 8.1 (32bit/64bit) or later  
+- Windows 8.1 (32bit/64bit) or later
+- Linux 64bit
 - No installation required  
 - No administrator privileges needed  
 
